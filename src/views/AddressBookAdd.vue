@@ -54,7 +54,7 @@ async function handleSubmit() {
   try {
     // 驗證表單
     await formRef.value.validate()
-
+    if (formData.birthday === '') formData.birthday = null
     submitting.value = true
 
     // 呼叫 API
@@ -100,34 +100,56 @@ function handleCancel() {
   <Navbar />
   <div class="container">
     <div class="row mt-4">
-      <div class="col-6 offset-3 mt-4">
+      <div class="col-8 offset-2">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">新增通訊錄</h5>
-            <form @submit="handleLogin">
-              <div class="mb-3">
-                <label for="username" class="form-label">帳號 (Email)</label>
-                <input type="email" class="form-control" :class="{ 'is-invalid': errors.username }" name="username"
-                  id="username" v-model="formData.username" @blur="markAsTouched('username')" :disabled="submitting" />
-                <div class="invalid-feedback" v-if="errors.username">
-                  {{ errors.username }}
-                </div>
-              </div>
-              <div class="mb-3">
-                <label for="password" class="form-label">密碼</label>
-                <input type="password" class="form-control" :class="{ 'is-invalid': errors.password }" name="password"
-                  id="password" v-model="formData.password" @blur="markAsTouched('password')" :disabled="submitting" />
-                <div class="invalid-feedback" v-if="errors.password">
-                  {{ errors.password }}
-                </div>
-              </div>
-              <button type="submit" class="btn btn-primary" :disabled="submitting">
-                {{ submitting ? '登入中...' : '登入' }}
-              </button>
-              <button type="button" class="btn btn-secondary ms-2" @click="handleReset" :disabled="submitting">
-                重設
-              </button>
-            </form>
+            <h5 class="card-title mb-4">新增通訊錄</h5>
+
+            <el-config-provider :locale="zhTw">
+              <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" label-position="left">
+                <!-- 姓名 (必填) -->
+                <el-form-item label="姓名" prop="name">
+                  <el-input v-model="formData.name" placeholder="請輸入姓名" :disabled="submitting" clearable />
+                </el-form-item>
+
+                <!-- Email (必填) -->
+                <el-form-item label="Email" prop="email">
+                  <el-input v-model="formData.email" type="email" placeholder="請輸入 Email" :disabled="submitting"
+                    clearable />
+                </el-form-item>
+
+                <!-- 手機 (必填) -->
+                <el-form-item label="手機" prop="mobile">
+                  <el-input v-model="formData.mobile" placeholder="請輸入手機號碼（例：0912345678）" :disabled="submitting"
+                    clearable />
+                </el-form-item>
+
+                <!-- 生日 (選填) -->
+                <el-form-item label="生日" prop="birthday">
+                  <el-date-picker v-model="formData.birthday" type="date" placeholder="請選擇生日" :disabled="submitting"
+                    style="width: 100%" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+                </el-form-item>
+
+                <!-- 地址 (選填) -->
+                <el-form-item label="地址" prop="address">
+                  <el-input v-model="formData.address" type="textarea" :rows="3" placeholder="請輸入地址"
+                    :disabled="submitting" clearable />
+                </el-form-item>
+
+                <!-- 按鈕群組 -->
+                <el-form-item>
+                  <el-button type="primary" @click="handleSubmit" :loading="submitting">
+                    {{ submitting ? '新增中...' : '新增' }}
+                  </el-button>
+                  <el-button @click="handleReset" :disabled="submitting">
+                    重設
+                  </el-button>
+                  <el-button @click="handleCancel" :disabled="submitting">
+                    取消
+                  </el-button>
+                </el-form-item>
+              </el-form>
+            </el-config-provider>
           </div>
         </div>
       </div>
