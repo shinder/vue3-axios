@@ -29,6 +29,11 @@ import { RouterLink } from 'vue-router';
               <RouterLink class="nav-link" to="/address-book/add">新增通訊錄</RouterLink>
             </li>
           </ul>
+          <ul class="navbar-nav mb-2 mb-lg-0">
+            <li class="nav-item">
+              <RouterLink class="nav-link" to="/login">登入</RouterLink>
+            </li>
+          </ul>
         </div>
       </div>
     </nav>
@@ -40,6 +45,6 @@ import { RouterLink } from 'vue-router';
   font-weight: bold;
   color: white;
   border-radius: 10px;
-  background-color: #337be8;
+  background-color: #0d6efd;
 }
 </style>
