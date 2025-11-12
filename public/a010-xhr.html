@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>使用 XMLHttpRequest 物件</title>
+  </head>
+  <body>
+    <button onclick="getData()">透過 XHR 取得資料</button><br />
+    <pre id="info"></pre>
+    <script>
+      const info = document.querySelector("#info");
+      function getData() {
+        // 建立 XMLHttpRequest 物件
+        const xhr = new XMLHttpRequest();
+
+        // 設定請求方法和 URL
+        xhr.open("GET", "https://httpbin.org/get");
+        // xhr.open("GET", "https://randomuser.me/api");
+        
+        // 設定回應處理函式
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              info.textContent = xhr.responseText;
+            } else {
+              info.textContent = "Error: " + xhr.status;
+            }
+          }
+        };
+
+        // 發送請求
+        xhr.send();
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>使用 Axios - GET</title>
+  </head>
+  <body>
+    <h2>使用 Axios - GET - Query-String</h2>
+    <button onclick="getData()">使用 Axios 取得資料</button><br />
+    <pre id="info"></pre>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="js/axios-api-common.js"></script>
+    <script>
+      const info = document.querySelector("#info");
+      async function getData() {
+        try {
+          const response = await api.get("/address_book/", {
+            params: { page: 2, search: "冠" },
+          });
+          info.textContent = JSON.stringify(response.data, null, 2);
+        } catch (error) {
+          info.textContent = "Error: " + error;
+        }
+      }
+    </script>
+  </body>
+</html>

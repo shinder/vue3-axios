@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>使用 Axios</title>
+  </head>
+  <body>
+    <button onclick="getData()">使用 Axios 取得資料</button><br />
+    <pre id="info"></pre>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      const info = document.querySelector("#info");
+      function getData() {
+        axios
+          .get("https://randomuser.me/api")
+          .then((response) => {
+            info.textContent = JSON.stringify(response.data, null, 2);
+          })
+          .catch((error) => {
+            info.textContent = "Error: " + error;
+          });
+      }
+    </script>
+  </body>
+</html>

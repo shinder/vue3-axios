@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>使用 Axios - PUT</title>
+    <link rel="stylesheet" href="css/edit.css" />
+  </head>
+  <body>
+    <h2>使用 Axios - PUT - 修改資料</h2>
+    <form name="form1" onsubmit="mySubmit(event)">
+      <label for="ab_id">編號:</label>
+      <input type="text" id="ab_id" name="ab_id" disabled />
+      <br />
+      <label for="name">姓名:</label>
+      <input type="text" id="name" name="name" required />
+      <br />
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required />
+      <br />
+      <label for="mobile">手機:</label>
+      <input type="text" id="mobile" name="mobile" />
+      <br />
+      <label for="birthday">生日:</label>
+      <input type="date" id="birthday" name="birthday" />
+      <br />
+      <label for="address">地址:</label>
+      <input type="text" id="address" name="address" />
+      <br />
+      <button type="submit">修改</button>
+    </form>
+    <br />
+    <strong>結果：</strong>
+    <pre id="info"></pre>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="js/axios-api-common.js"></script>
+    <script>
+      let originalData = {};
+      const info = document.querySelector("#info");
+      const usp = new URLSearchParams(location.search);
+      const ab_id = +usp.get("ab_id");
+      if (!ab_id) location.href = "a100-axios-list.html";
+      (async function () {
+        try {
+          const response = await api.get(`/address_book/${ab_id}`);
+          if (!response.data.success) {
+            info.textContent = "找不到資料";
+            return;
+          }
+          originalData = response.data.data;
+          console.log(originalData);
+
+          const form = document.form1;
+          for (const [k, v] of Object.entries(originalData)) {
+            if (!form.elements[k]) continue;
+            form.elements[k].value = v;
+          }
+        } catch (error) {
+          info.textContent = "Error: " + error;
+        }
+      })();
+      // 處理將要送出的資料
+      function handleData() {
+        const form = document.form1;
+        const myData = {
+          name: form.name.value,
+          email: form.email.value,
+          mobile: form.mobile.value,
+          birthday: form.birthday.value,
+          address: form.address.value,
+        };
+        return myData;
+      }
+
+      async function mySubmit(e) {
+        e.preventDefault(); // 避免以預設方式送出表單（阻止表單預設提交行為）
+        const myData = handleData(); // 取得將要送出的資料
+        try {
+          const response = await api.put(
+            `/address_book/${originalData.ab_id}`,
+            myData
+          );
+          info.textContent = JSON.stringify(response.data, null, 2);
+        } catch (error) {
+          info.textContent = "Error: " + error;
+        }
+      }
+    </script>
+  </body>
+</html>
