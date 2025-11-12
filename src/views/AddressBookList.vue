@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 // import zhTw from 'element-plus/es/locale/lang/zh-tw.mjs'
@@ -133,6 +133,17 @@ function handleAdd() {
   router.push('/address-book/add')
 }
 
+const paginationData = computed(() => {
+  const ar = [];
+  for (let i = 0; i < 11; i++) {
+    const p = currentPage.value - 5 + i;
+    if (p >= 1 && p <= totalPages.value) {
+      ar.push(p)
+    }
+  }
+  return ar;
+})
+
 // 組件掛載時載入資料
 onMounted(() => {
   // 從 URL query string 讀取頁碼
@@ -150,8 +161,10 @@ onMounted(() => {
         <div class="col">
           <nav aria-label="Page navigation example">
             <ul class="pagination">
-              <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-
+              <li class="page-item" v-for="p in paginationData" :key="p">
+                <span v-if="p == currentPage" class="page-link active">{{ p }}</span>
+                <button v-else class="page-link" @click="handlePageChange(p)">{{ p }}</button>
+              </li>
             </ul>
           </nav>
         </div>
@@ -179,7 +192,7 @@ onMounted(() => {
                 <td>{{ item.birthday }}</td>
                 <td>{{ item.address }}</td>
                 <td>
-                  <button class="btn btn-sm btn-warning">
+                  <button class="btn btn-sm btn-warning" @click="handleEdit(item)">
                     <i class="fa-solid fa-pen-to-square"></i>
                   </button>
                   {{ " " }}
