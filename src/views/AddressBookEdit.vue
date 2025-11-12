@@ -2,6 +2,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Loading } from '@element-plus/icons-vue'
 import zhTw from 'element-plus/es/locale/lang/zh-tw.mjs'
 import Navbar from '@/components/Navbar.vue'
 import { addressBookApi } from '@/api/modules/address_book'
@@ -102,7 +103,7 @@ async function handleSubmit() {
   try {
     // 驗證表單
     await formRef.value.validate()
-
+    if (formData.birthday === '') formData.birthday = null
     submitting.value = true
 
     // 呼叫更新 API
@@ -157,236 +158,112 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <Navbar />
-    <el-container class="edit-container">
-      <el-main>
-        <!-- 載入狀態 -->
-        <div v-if="loading" class="loading">
-          <el-icon class="is-loading" :size="40">
-            <Loading />
-          </el-icon>
-          <p>載入中...</p>
-        </div>
+  <Navbar />
+  <div class="container">
+    <div class="row mt-4">
+      <div class="col-8 offset-2">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-4">編輯聯絡人 #{{ contactId }}</h5>
 
-        <!-- 表單卡片 -->
-        <el-card v-else class="form-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <div class="header-left">
-                <el-icon :size="24">
-                  <Edit />
-                </el-icon>
-                <span class="header-text">編輯聯絡人</span>
-              </div>
-            </div>
-          </template>
-
-          <!-- 表單 -->
-          <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" label-position="right"
-            size="large">
-            <!-- 編號欄位（唯讀） -->
-            <el-form-item label="編號">
-              <el-input v-model="contactId" disabled placeholder="自動產生" />
-            </el-form-item>
-
-            <el-form-item label="姓名" prop="name">
-              <el-input v-model="formData.name" placeholder="請輸入姓名" clearable :maxlength="50" show-word-limit />
-            </el-form-item>
-
-            <el-form-item label="手機" prop="mobile">
-              <el-input v-model="formData.mobile" placeholder="請輸入手機號碼（例：0912345678）" clearable :maxlength="10" />
-            </el-form-item>
-
-            <el-form-item label="Email" prop="email">
-              <el-input v-model="formData.email" type="email" placeholder="請輸入 Email" clearable />
-            </el-form-item>
-
-            <el-form-item label="生日" prop="birthday">
-              <el-config-provider :locale="zhTw">
-                <el-date-picker v-model="formData.birthday" type="date" placeholder="請選擇生日" style="width: 100%"
-                  format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
-              </el-config-provider>
-            </el-form-item>
-
-            <el-form-item label="地址" prop="address">
-              <el-input v-model="formData.address" type="textarea" placeholder="請輸入地址" :rows="3" clearable
-                :maxlength="200" show-word-limit />
-            </el-form-item>
-
-            <!-- 按鈕群組 -->
-            <el-form-item>
-              <div class="button-group">
-                <el-button type="primary" :loading="submitting" @click="handleSubmit">
-                  <el-icon>
-                    <Check />
-                  </el-icon>
-                  {{ submitting ? '更新中...' : '更新' }}
-                </el-button>
-                <el-button @click="handleReset" :disabled="submitting">
-                  <el-icon>
-                    <RefreshLeft />
-                  </el-icon>
-                  重設
-                </el-button>
-                <el-button @click="handleCancel" :disabled="submitting">
-                  <el-icon>
-                    <Close />
-                  </el-icon>
-                  取消
-                </el-button>
-              </div>
-            </el-form-item>
-          </el-form>
-        </el-card>
-
-        <!-- 提示卡片 -->
-        <el-card v-if="!loading" class="hint-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <el-icon :size="20">
-                <InfoFilled />
+            <!-- 載入中狀態 -->
+            <div v-if="loading" class="text-center py-5">
+              <el-icon class="is-loading" :size="40">
+                <Loading />
               </el-icon>
-              <span class="header-text">填寫說明</span>
+              <p class="mt-3 text-muted">載入資料中...</p>
             </div>
-          </template>
-          <ul class="hint-list">
-            <li><strong>姓名</strong>、<strong>手機</strong>、<strong>Email</strong> 為必填欄位</li>
-            <li>手機號碼格式：09 開頭，共 10 碼（例：0912345678）</li>
-            <li>Email 需符合正確的 Email 格式</li>
-            <li>生日和地址為選填欄位</li>
-          </ul>
-        </el-card>
-      </el-main>
-    </el-container>
+
+            <!-- 表單內容 -->
+            <el-config-provider v-else :locale="zhTw">
+              <el-form
+                ref="formRef"
+                :model="formData"
+                :rules="rules"
+                label-width="100px"
+                label-position="left"
+                v-loading="submitting"
+              >
+                <!-- 姓名 (必填) -->
+                <el-form-item label="姓名" prop="name">
+                  <el-input
+                    v-model="formData.name"
+                    placeholder="請輸入姓名"
+                    :disabled="submitting || loading"
+                    clearable
+                  />
+                </el-form-item>
+
+                <!-- Email (必填) -->
+                <el-form-item label="Email" prop="email">
+                  <el-input
+                    v-model="formData.email"
+                    type="email"
+                    placeholder="請輸入 Email"
+                    :disabled="submitting || loading"
+                    clearable
+                  />
+                </el-form-item>
+
+                <!-- 手機 (必填) -->
+                <el-form-item label="手機" prop="mobile">
+                  <el-input
+                    v-model="formData.mobile"
+                    placeholder="請輸入手機號碼（例：0912345678）"
+                    :disabled="submitting || loading"
+                    clearable
+                  />
+                </el-form-item>
+
+                <!-- 生日 (選填) -->
+                <el-form-item label="生日" prop="birthday">
+                  <el-date-picker
+                    v-model="formData.birthday"
+                    type="date"
+                    placeholder="請選擇生日"
+                    :disabled="submitting || loading"
+                    style="width: 100%"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                  />
+                </el-form-item>
+
+                <!-- 地址 (選填) -->
+                <el-form-item label="地址" prop="address">
+                  <el-input
+                    v-model="formData.address"
+                    type="textarea"
+                    :rows="3"
+                    placeholder="請輸入地址"
+                    :disabled="submitting || loading"
+                    clearable
+                  />
+                </el-form-item>
+
+                <!-- 按鈕群組 -->
+                <el-form-item>
+                  <el-button
+                    type="primary"
+                    @click="handleSubmit"
+                    :loading="submitting"
+                    :disabled="loading"
+                  >
+                    {{ submitting ? '更新中...' : '更新' }}
+                  </el-button>
+                  <el-button @click="handleReset" :disabled="submitting || loading">
+                    重設
+                  </el-button>
+                  <el-button @click="handleCancel" :disabled="submitting || loading">
+                    取消
+                  </el-button>
+                </el-form-item>
+              </el-form>
+            </el-config-provider>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
-<style scoped>
-.edit-container {
-  min-height: calc(100vh - 60px);
-  background-color: #f5f7fa;
-}
-
-.el-main {
-  padding: 40px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.form-card {
-  margin-bottom: 30px;
-}
-
-.hint-card {
-  background-color: #f0f9ff;
-  border: 1px solid #91d5ff;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-text {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-/* 載入狀態 */
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  color: #909399;
-}
-
-.loading p {
-  margin-top: 15px;
-  font-size: 16px;
-}
-
-/* 表單樣式 */
-:deep(.el-form) {
-  padding: 20px;
-}
-
-:deep(.el-form-item__label) {
-  font-weight: 600;
-  color: #606266;
-}
-
-/* 按鈕群組 */
-.button-group {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.button-group .el-button {
-  min-width: 120px;
-}
-
-/* 提示列表 */
-.hint-list {
-  margin: 0;
-  padding-left: 20px;
-  color: #606266;
-  font-size: 14px;
-  line-height: 2;
-}
-
-.hint-list li {
-  margin-bottom: 8px;
-}
-
-.hint-list strong {
-  color: #409eff;
-}
-
-/* 響應式設計 */
-@media (max-width: 768px) {
-  .el-main {
-    padding: 20px;
-  }
-
-  :deep(.el-form) {
-    padding: 10px;
-  }
-
-  :deep(.el-form-item) {
-    margin-bottom: 18px;
-  }
-
-  :deep(.el-form-item__label) {
-    text-align: left !important;
-  }
-
-  .button-group {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .button-group .el-button {
-    width: 100%;
-  }
-}
-
-/* 平板裝置 */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .el-main {
-    padding: 30px;
-    max-width: 100%;
-  }
-}
-</style>
+<style scoped></style>

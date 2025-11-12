@@ -103,7 +103,7 @@ function handleCancel() {
       <div class="col-8 offset-2">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title mb-4">新增通訊錄</h5>
+            <h5 class="card-title mb-4">新增連絡人</h5>
 
             <el-config-provider :locale="zhTw">
               <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" label-position="left">
