@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter, useRoute, RouterLink } from 'vue-router'
+import { useRouter, useRoute, RouterLink, onBeforeRouteUpdate } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 // import zhTw from 'element-plus/es/locale/lang/zh-tw.mjs'
 import Navbar from '@/components/Navbar.vue'
@@ -75,7 +75,6 @@ function handlePageChange(page) {
     path: '/address-book',
     query: { page }
   })
-  fetchAddressBookList()
 }
 
 /**
@@ -149,6 +148,13 @@ onMounted(() => {
   // 從 URL query string 讀取頁碼
   const pageFromQuery = parseInt(route.query.page) || 1
   currentPage.value = pageFromQuery
+  fetchAddressBookList()
+})
+
+// 監聽路由更新（包含瀏覽器上一頁/下一頁）
+onBeforeRouteUpdate((to, from) => {
+  const pageNumber = parseInt(to.query.page) || 1
+  currentPage.value = pageNumber
   fetchAddressBookList()
 })
 </script>
