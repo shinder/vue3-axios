@@ -22,6 +22,12 @@ import { RouterLink } from 'vue-router';
             <li class="nav-item">
               <RouterLink class="nav-link" to="/contact">Contact</RouterLink>
             </li>
+            <li class="nav-item">
+              <RouterLink class="nav-link" to="/address-book">通訊錄列表</RouterLink>
+            </li>
+            <li class="nav-item">
+              <RouterLink class="nav-link" to="/address-book/add">新增通訊錄</RouterLink>
+            </li>
           </ul>
         </div>
       </div>

@@ -1,0 +1,199 @@
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute, RouterLink } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+// import zhTw from 'element-plus/es/locale/lang/zh-tw.mjs'
+import Navbar from '@/components/Navbar.vue'
+import { addressBookApi } from '@/api/modules/address_book'
+
+const router = useRouter()
+const route = useRoute()
+
+// 響應式資料
+const addressBookList = ref([])
+const loading = ref(false)
+const error = ref(null)
+
+// 分頁參數
+const currentPage = ref(1)
+const pageSize = ref(20)
+const totalItems = ref(0)
+const totalPages = ref(0)
+
+/**
+ * 取得通訊錄列表
+ */
+async function fetchAddressBookList() {
+  loading.value = true
+  error.value = null
+
+  try {
+    const result = await addressBookApi.getAddressBookList({
+      page: currentPage.value,
+      page_size: pageSize.value,
+    })
+
+    console.log('API result:', result)
+
+    // 根據 API 回應格式處理資料
+    if (result.success) {
+      addressBookList.value = result.data
+
+      // 處理分頁資訊
+      if (result.pagination) {
+        totalItems.value = result.pagination.total_rows
+        totalPages.value = result.pagination.total_pages
+        console.log('分頁資訊:', {
+          totalItems: totalItems.value,
+          totalPages: totalPages.value,
+          currentPage: currentPage.value,
+          pageSize: pageSize.value
+        })
+      } else {
+        console.warn('API 回應中沒有 pagination 資訊')
+      }
+    } else {
+      error.value = result.message || '載入通訊錄列表失敗'
+      ElMessage.error(error.value)
+    }
+  } catch (err) {
+    error.value = '載入通訊錄列表失敗'
+    console.error('取得通訊錄列表錯誤:', err)
+    ElMessage.error(error.value)
+  } finally {
+    loading.value = false
+  }
+}
+
+/**
+ * 變更頁碼
+ */
+function handlePageChange(page) {
+  currentPage.value = page
+  // 更新 URL query string
+  router.push({
+    path: '/address-book',
+    query: { page }
+  })
+  fetchAddressBookList()
+}
+
+/**
+ * 編輯通訊錄
+ */
+function handleEdit(row) {
+  router.push(`/address-book/edit/${row.ab_id}`)
+}
+
+/**
+ * 刪除通訊錄
+ */
+async function handleDelete(row) {
+  try {
+    await ElMessageBox.confirm(
+      `確定要刪除「${row.name}」嗎？此操作無法復原。`,
+      '警告',
+      {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+
+    loading.value = true
+
+    try {
+      const result = await addressBookApi.deleteAddressBookItem(row.ab_id)
+
+      if (result.success) {
+        ElMessage.success('刪除成功')
+        // 重新載入列表
+        await fetchAddressBookList()
+      } else {
+        ElMessage.error(result.message || '刪除失敗')
+      }
+    } catch (err) {
+      console.error('刪除錯誤:', err)
+      ElMessage.error('刪除失敗')
+    } finally {
+      loading.value = false
+    }
+  } catch (error) {
+    // 使用者取消刪除
+    if (error !== 'cancel') {
+      console.error('刪除錯誤:', error)
+    }
+  }
+}
+
+/**
+ * 新增聯絡人
+ */
+function handleAdd() {
+  router.push('/address-book/add')
+}
+
+// 組件掛載時載入資料
+onMounted(() => {
+  // 從 URL query string 讀取頁碼
+  const pageFromQuery = parseInt(route.query.page) || 1
+  currentPage.value = pageFromQuery
+  fetchAddressBookList()
+})
+</script>
+
+<template>
+  <div>
+    <Navbar />
+    <div class="container" v-if="!loading && addressBookList.length">
+      <div class="row mt-4">
+        <div class="col">
+          <nav aria-label="Page navigation example">
+            <ul class="pagination">
+              <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>編號</th>
+                <th>姓名</th>
+                <th>電郵</th>
+                <th>手機</th>
+                <th>生日</th>
+                <th>地址</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in addressBookList">
+                <td>{{ item.ab_id }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.email }}</td>
+                <td>{{ item.mobile }}</td>
+                <td>{{ item.birthday }}</td>
+                <td>{{ item.address }}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                  {{ " " }}
+                  <button class="btn btn-sm btn-danger" @click="handleDelete(item)">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped></style>
