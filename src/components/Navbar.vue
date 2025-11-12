@@ -83,20 +83,4 @@ async function handleLogout() {
   border-radius: 10px;
   background-color: #0d6efd;
 }
-
-/* 讓登出按鈕看起來像導航連結 */
-.navbar-nav .btn-link {
-  padding: 0;
-  text-decoration: none;
-  color: rgba(0, 0, 0, 0.55);
-}
-
-.navbar-nav .btn-link:hover {
-  color: rgba(0, 0, 0, 0.7);
-}
-
-/* 用戶名稱樣式 */
-.navbar-nav .nav-link i {
-  margin-right: 0.25rem;
-}
 </style>

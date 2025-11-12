@@ -160,56 +160,54 @@ onBeforeRouteUpdate((to, from) => {
 </script>
 
 <template>
-  <div>
-    <Navbar />
-    <div class="container" v-if="!loading && addressBookList.length">
-      <div class="row mt-4">
-        <div class="col">
-          <nav aria-label="Page navigation example">
-            <ul class="pagination">
-              <li class="page-item" v-for="p in paginationData" :key="p">
-                <span v-if="p == currentPage" class="page-link active">{{ p }}</span>
-                <button v-else class="page-link" @click="handlePageChange(p)">{{ p }}</button>
-              </li>
-            </ul>
-          </nav>
-        </div>
+  <Navbar />
+  <div class="container" v-if="!loading && addressBookList.length">
+    <div class="row mt-4">
+      <div class="col">
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item" v-for="p in paginationData" :key="p">
+              <span v-if="p == currentPage" class="page-link active">{{ p }}</span>
+              <button v-else class="page-link" @click="handlePageChange(p)">{{ p }}</button>
+            </li>
+          </ul>
+        </nav>
       </div>
-      <div class="row">
-        <div class="col">
-          <table class="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th>編號</th>
-                <th>姓名</th>
-                <th>電郵</th>
-                <th>手機</th>
-                <th>生日</th>
-                <th>地址</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in addressBookList">
-                <td>{{ item.ab_id }}</td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.email }}</td>
-                <td>{{ item.mobile }}</td>
-                <td>{{ item.birthday }}</td>
-                <td>{{ item.address }}</td>
-                <td>
-                  <button class="btn btn-sm btn-warning" @click="handleEdit(item)">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                  </button>
-                  {{ " " }}
-                  <button class="btn btn-sm btn-danger" @click="handleDelete(item)">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>編號</th>
+              <th>姓名</th>
+              <th>電郵</th>
+              <th>手機</th>
+              <th>生日</th>
+              <th>地址</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in addressBookList">
+              <td>{{ item.ab_id }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.email }}</td>
+              <td>{{ item.mobile }}</td>
+              <td>{{ item.birthday }}</td>
+              <td>{{ item.address }}</td>
+              <td>
+                <button class="btn btn-sm btn-warning" @click="handleEdit(item)">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                {{ " " }}
+                <button class="btn btn-sm btn-danger" @click="handleDelete(item)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
