@@ -1,8 +1,8 @@
 <script setup>
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 /**
@@ -46,7 +46,12 @@ async function handleLogout() {
           <ul class="navbar-nav mb-2 mb-lg-0">
             <!-- 未登入時顯示登入連結 -->
             <li class="nav-item" v-if="!authStore.isLoggedIn">
-              <RouterLink class="nav-link" to="/login">登入</RouterLink>
+              <RouterLink
+                class="nav-link"
+                :to="{ path: '/login', query: { redirect: route.fullPath } }"
+              >
+                登入
+              </RouterLink>
             </li>
 
             <!-- 已登入時顯示用戶資訊和登出按鈕 -->
