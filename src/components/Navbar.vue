@@ -1,8 +1,9 @@
 <script setup>
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
 
 /**
@@ -10,9 +11,16 @@ const authStore = useAuthStore()
  */
 async function handleLogout() {
   await authStore.logout()
-  // 不主動跳轉，讓路由守衛決定是否需要跳轉到登入頁
-  // 如果當前頁面不需要登入，會停留在原頁面
-  // 如果當前頁面需要登入（requiresAuth: true），路由守衛會自動跳轉
+
+  // 檢查當前頁面是否需要登入
+  // 如果需要登入，手動跳轉到登入頁（因為路由守衛不會在同一頁面觸發）
+  if (route.meta.requiresAuth) {
+    router.push({
+      path: '/login',
+      query: { redirect: route.fullPath }
+    })
+  }
+  // 如果當前頁面不需要登入，則停留在原頁面
 }
 </script>
 
