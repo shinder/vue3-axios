@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute, RouterLink, onBeforeRouteUpdate } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Loading } from '@element-plus/icons-vue'
 // import zhTw from 'element-plus/es/locale/lang/zh-tw.mjs'
 import Navbar from '@/components/Navbar.vue'
 import { addressBookApi } from '@/api/modules/address_book'
@@ -161,54 +162,74 @@ onBeforeRouteUpdate((to, from) => {
 
 <template>
   <Navbar />
-  <div class="container" v-if="!loading && addressBookList.length">
-    <div class="row mt-4">
-      <div class="col">
-        <nav aria-label="Page navigation example">
-          <ul class="pagination">
-            <li class="page-item" v-for="p in paginationData" :key="p">
-              <span v-if="p == currentPage" class="page-link active">{{ p }}</span>
-              <button v-else class="page-link" @click="handlePageChange(p)">{{ p }}</button>
-            </li>
-          </ul>
-        </nav>
+  <div class="container">
+    <!-- 載入中狀態 -->
+    <div v-if="loading" class="text-center py-5 mt-4">
+      <el-icon class="is-loading" :size="40">
+        <Loading />
+      </el-icon>
+      <p class="mt-3 text-muted">載入資料中...</p>
+    </div>
+
+    <!-- 列表內容 -->
+    <div v-else-if="addressBookList.length">
+      <div class="row mt-4">
+        <div class="col">
+          <nav aria-label="Page navigation example">
+            <ul class="pagination">
+              <li class="page-item" v-for="p in paginationData" :key="p">
+                <span v-if="p == currentPage" class="page-link active">{{ p }}</span>
+                <button v-else class="page-link" @click="handlePageChange(p)">{{ p }}</button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>編號</th>
+                <th>姓名</th>
+                <th>電郵</th>
+                <th>手機</th>
+                <th>生日</th>
+                <th>地址</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in addressBookList" :key="item.ab_id">
+                <td>{{ item.ab_id }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.email }}</td>
+                <td>{{ item.mobile }}</td>
+                <td>{{ item.birthday }}</td>
+                <td>{{ item.address }}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning" @click="handleEdit(item)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                  {{ " " }}
+                  <button class="btn btn-sm btn-danger" @click="handleDelete(item)">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
-        <table class="table table-bordered table-striped">
-          <thead>
-            <tr>
-              <th>編號</th>
-              <th>姓名</th>
-              <th>電郵</th>
-              <th>手機</th>
-              <th>生日</th>
-              <th>地址</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in addressBookList">
-              <td>{{ item.ab_id }}</td>
-              <td>{{ item.name }}</td>
-              <td>{{ item.email }}</td>
-              <td>{{ item.mobile }}</td>
-              <td>{{ item.birthday }}</td>
-              <td>{{ item.address }}</td>
-              <td>
-                <button class="btn btn-sm btn-warning" @click="handleEdit(item)">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-                {{ " " }}
-                <button class="btn btn-sm btn-danger" @click="handleDelete(item)">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+
+    <!-- 空資料狀態 -->
+    <div v-else class="text-center py-5 mt-4">
+      <p class="text-muted">目前沒有任何聯絡人資料</p>
+      <button class="btn btn-primary mt-3" @click="handleAdd">
+        <i class="fa-solid fa-plus"></i>
+        新增聯絡人
+      </button>
     </div>
   </div>
 </template>
