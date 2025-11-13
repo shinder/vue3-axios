@@ -1,8 +1,7 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ElMessage } from 'element-plus'
 import Navbar from "@/components/Navbar.vue"
 
 const router = useRouter()
@@ -15,66 +14,34 @@ const formData = reactive({
   password: ''
 })
 
-// 追蹤欄位是否被觸碰過（用於顯示錯誤訊息）
-const touched = reactive({
-  username: false,
-  password: false
-})
+// 表單 ref
+const formRef = ref(null)
 
 // 提交狀態
 const submitting = ref(false)
 
-// Email 格式驗證正則表達式
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-// 欄位驗證錯誤訊息（computed）
-const errors = computed(() => ({
-  username: (() => {
-    if (!touched.username) return ''
-    if (!formData.username) return '請輸入帳號 (Email)'
-    if (!emailRegex.test(formData.username)) return '請輸入正確的 Email 格式'
-    return ''
-  })(),
-  password: (() => {
-    if (!touched.password) return ''
-    if (!formData.password) return '請輸入密碼'
-    if (formData.password.length < 6) return '密碼長度至少 6 個字元'
-    return ''
-  })()
-}))
-
-// 表單是否有效
-const isFormValid = computed(() => {
-  return formData.username &&
-    emailRegex.test(formData.username) &&
-    formData.password &&
-    formData.password.length >= 6
-})
-
-/**
- * 標記欄位為已觸碰
- */
-function markAsTouched(field) {
-  touched[field] = true
+// 表單驗證規則
+const rules = {
+  username: [
+    { required: true, message: '請輸入帳號 (Email)', trigger: 'blur' },
+    { type: 'email', message: '請輸入正確的 Email 格式', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '請輸入密碼', trigger: 'blur' },
+    { min: 6, message: '密碼長度至少 6 個字元', trigger: 'blur' }
+  ]
 }
 
 /**
  * 送出登入表單
  */
-async function handleLogin(event) {
-  event.preventDefault()
-
-  // 標記所有欄位為已觸碰（顯示所有錯誤訊息）
-  touched.username = true
-  touched.password = true
-
-  // 驗證表單
-  if (!isFormValid.value) {
-    ElMessage.error('請修正表單錯誤')
-    return
-  }
+async function handleLogin() {
+  if (!formRef.value) return
 
   try {
+    // 驗證表單
+    await formRef.value.validate()
+
     submitting.value = true
 
     // 使用 auth store 的 login action
@@ -96,10 +63,8 @@ async function handleLogin(event) {
  * 重設表單
  */
 function handleReset() {
-  formData.username = ''
-  formData.password = ''
-  touched.username = false
-  touched.password = false
+  if (!formRef.value) return
+  formRef.value.resetFields()
 }
 </script>
 
@@ -110,31 +75,49 @@ function handleReset() {
       <div class="col-6 offset-3 mt-4">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">會員登入</h5>
-            <form @submit="handleLogin">
-              <div class="mb-3">
-                <label for="username" class="form-label">帳號 (Email)</label>
-                <input type="email" class="form-control" :class="{ 'is-invalid': errors.username }" name="username"
-                  id="username" v-model="formData.username" @blur="markAsTouched('username')" :disabled="submitting" />
-                <div class="invalid-feedback" v-if="errors.username">
-                  {{ errors.username }}
-                </div>
-              </div>
-              <div class="mb-3">
-                <label for="password" class="form-label">密碼</label>
-                <input type="password" class="form-control" :class="{ 'is-invalid': errors.password }" name="password"
-                  id="password" v-model="formData.password" @blur="markAsTouched('password')" :disabled="submitting" />
-                <div class="invalid-feedback" v-if="errors.password">
-                  {{ errors.password }}
-                </div>
-              </div>
-              <button type="submit" class="btn btn-primary" :disabled="submitting">
-                {{ submitting ? '登入中...' : '登入' }}
-              </button>
-              <button type="button" class="btn btn-secondary ms-2" @click="handleReset" :disabled="submitting">
-                重設
-              </button>
-            </form>
+            <h5 class="card-title mb-4">會員登入</h5>
+
+            <el-form
+              ref="formRef"
+              :model="formData"
+              :rules="rules"
+              label-width="100px"
+              label-position="left"
+              @submit.prevent="handleLogin"
+            >
+              <!-- 帳號 (Email) -->
+              <el-form-item label="帳號" prop="username">
+                <el-input
+                  v-model="formData.username"
+                  type="email"
+                  placeholder="請輸入 Email"
+                  :disabled="submitting"
+                  clearable
+                />
+              </el-form-item>
+
+              <!-- 密碼 -->
+              <el-form-item label="密碼" prop="password">
+                <el-input
+                  v-model="formData.password"
+                  type="password"
+                  placeholder="請輸入密碼"
+                  :disabled="submitting"
+                  show-password
+                  clearable
+                />
+              </el-form-item>
+
+              <!-- 按鈕群組 -->
+              <el-form-item>
+                <el-button type="primary" @click="handleLogin" :loading="submitting">
+                  {{ submitting ? '登入中...' : '登入' }}
+                </el-button>
+                <el-button @click="handleReset" :disabled="submitting">
+                  重設
+                </el-button>
+              </el-form-item>
+            </el-form>
           </div>
         </div>
       </div>

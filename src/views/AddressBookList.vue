@@ -133,6 +133,7 @@ function handleAdd() {
   router.push('/address-book/add')
 }
 
+// 處理取得分頁按鈕的資料
 const paginationData = computed(() => {
   const ar = [];
   for (let i = 0; i < 11; i++) {
@@ -171,8 +172,8 @@ onBeforeRouteUpdate((to, from) => {
       <p class="mt-3 text-muted">載入資料中...</p>
     </div>
 
-    <!-- 列表內容 -->
     <div v-else-if="addressBookList.length">
+      <!-- 分頁按鈕 -->
       <div class="row mt-4">
         <div class="col">
           <nav aria-label="Page navigation example">
@@ -185,6 +186,7 @@ onBeforeRouteUpdate((to, from) => {
           </nav>
         </div>
       </div>
+      <!-- 列表內容 -->
       <div class="row">
         <div class="col">
           <table class="table table-bordered table-striped">

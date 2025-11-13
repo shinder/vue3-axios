@@ -1,4 +1,4 @@
-import request from "../index";
+import request from "../index";  // 就是其中的 service
 
 /**
  * 通訊錄相關 API
